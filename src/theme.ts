@@ -1,7 +1,7 @@
 import { createContext, useState, useMemo } from 'react';
-import { createTheme, Theme } from '@mui/material/styles';
-
-type ThemeStr = 'dark' | 'light';
+import { createTheme, Theme, ThemeOptions, PaletteOptions } from '@mui/material/styles';
+import { TypographyOptions } from '@mui/material/styles/createTypography';
+import { PaletteMode } from '@mui/material';
 
 interface Pallete {
   primary: Color;
@@ -9,19 +9,6 @@ interface Pallete {
   greenAccent: Color;
   redAccent: Color;
   blueAccent: Color;
-}
-
-interface ThemeSettingsColors {
-  primary: object;
-  secondary: object;
-  neutral: object;
-  background: object;
-}
-
-interface ThemeSettings {
-  mode: string;
-  colors: ThemeSettingsColors;
-  typography: object;
 }
 
 interface ColorMode {
@@ -41,40 +28,31 @@ interface Color {
 }
 
 // color design tokens
-export function tokens(mode: ThemeStr): Pallete {
-  return {
-    ...(mode === 'dark' ? darkPallete : lightPallete),
-  };
+export function tokens(mode: PaletteMode): Pallete {
+  console.log(`Creating tokens for ${mode} mode`);
+  return mode === 'dark' ? darkPallete : lightPallete;
 }
 
 // mui theme settings
-export function themeSettings(mode: ThemeStr): ThemeSettings {
-  const darkTS: ThemeSettingsColors = {
+export function themeOptions(mode: PaletteMode): ThemeOptions {
+  const darkTS: PaletteOptions = {
     primary: { main: darkPallete.primary[500] },
     secondary: { main: darkPallete.greenAccent[500] },
-    neutral: {
-      main: darkPallete.grey[500],
-      dark: darkPallete.grey[700],
-      light: darkPallete.grey[100],
-    },
-    background: { default: darkPallete.primary[100] },
+    background: { default: darkPallete.primary[100] }
   };
 
-  const lightTS: ThemeSettingsColors = {
+  const lightTS: PaletteOptions = {
     primary: { main: lightPallete.primary[100] },
     secondary: { main: lightPallete.greenAccent[500] },
-    neutral: {
-      main: lightPallete.grey[500],
-      dark: lightPallete.grey[700],
-      light: lightPallete.grey[100],
-    },
-    background: { default: '#fcfcfc' },
+    background: { default: '#fcfcfc' }
   };
 
+  console.log(`Creating theme settings for ${mode} mode`);
+  const colors = mode === 'dark' ? darkTS : lightTS
+  const p = { ...colors, mode };
   return {
-    mode: mode,
-    colors: mode === 'dark' ? darkTS : lightTS,
-    typography: typography,
+    palette: p,
+    typography
   };
 }
 
@@ -83,16 +61,29 @@ export const ColorModeContext = createContext({
 });
 
 export function useMode(): [Theme, ColorMode] {
-  const [mode, setMode] = useState<ThemeStr>('light');
+  const [mode, setMode] = useState<PaletteMode>('light');
+
+  // const colorMode: ColorMode = useMemo(
+  //   () => ({
+  //     toggleColorMode: () => setMode(prevMode => (prevMode === 'light' ? 'dark' : 'light')),
+  //   }),
+  //   [],
+  // );
 
   const colorMode: ColorMode = useMemo(
     () => ({
-      toggleColorMode: () => setMode(prevMode => (prevMode === 'light' ? 'dark' : 'light')),
+      toggleColorMode: () =>
+        setMode(prevMode => {
+          const newMode = prevMode === 'light' ? 'dark' : 'light';
+          console.log(`Setting ${prevMode} color mode to ${newMode}`);
+          return newMode;
+        }),
     }),
     [],
   );
 
-  const theme: Theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
+  const to: ThemeOptions = themeOptions(mode);
+  const theme: Theme = useMemo(() => createTheme(to), [mode]);
 
   return [theme, colorMode];
 }
@@ -213,7 +204,7 @@ const darkPallete: Pallete = {
   },
 };
 
-const typography: object = {
+const typography: TypographyOptions = {
   fontFamily: ['Source Sans Pro', 'sans-serif'].join(','),
   fontSize: 12,
   h1: {
