@@ -3,7 +3,7 @@ import { createTheme, Theme, ThemeOptions, PaletteOptions } from '@mui/material/
 import { TypographyOptions } from '@mui/material/styles/createTypography';
 import { PaletteMode } from '@mui/material';
 
-interface Pallete {
+export interface CustomPalette {
   primary: Color;
   grey: Color;
   greenAccent: Color;
@@ -28,7 +28,7 @@ interface Color {
 }
 
 // color design tokens
-export function tokens(mode: PaletteMode): Pallete {
+export function tokens(mode: PaletteMode): CustomPalette {
   console.log(`Creating tokens for ${mode} mode`);
   return mode === 'dark' ? darkPallete : lightPallete;
 }
@@ -47,7 +47,6 @@ export function themeOptions(mode: PaletteMode): ThemeOptions {
     background: { default: '#fcfcfc' }
   };
 
-  console.log(`Creating theme settings for ${mode} mode`);
   const colors = mode === 'dark' ? darkTS : lightTS
   const p = { ...colors, mode };
   return {
@@ -75,7 +74,6 @@ export function useMode(): [Theme, ColorMode] {
       toggleColorMode: () =>
         setMode(prevMode => {
           const newMode = prevMode === 'light' ? 'dark' : 'light';
-          console.log(`Setting ${prevMode} color mode to ${newMode}`);
           return newMode;
         }),
     }),
@@ -88,7 +86,7 @@ export function useMode(): [Theme, ColorMode] {
   return [theme, colorMode];
 }
 
-const lightPallete: Pallete = {
+const lightPallete: CustomPalette = {
   grey: {
     100: '#141414',
     200: '#292929',
@@ -146,7 +144,7 @@ const lightPallete: Pallete = {
   },
 };
 
-const darkPallete: Pallete = {
+const darkPallete: CustomPalette = {
   grey: {
     100: '#e0e0e0',
     200: '#c2c2c2',
